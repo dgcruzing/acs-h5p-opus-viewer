@@ -19,6 +19,15 @@ observed on the development machine. See [validation scope](docs/VALIDATION.md).
 Node and WebView2 are separate prerequisites. DopusWorX and Lumi are not required.
 The plugin claims only `.h5p`; it does not replace other viewers or edit lessons.
 
+## Sample lesson
+
+Download the [From footing to blockwall sample](samples/footing-blockwall/README.md)
+to try slides, synthetic narration, animated videos, captions, questions and five
+full-page illustrations. The fourteen-slide package includes its media and H5P
+libraries and plays offline. Read [how it was made](samples/footing-blockwall/HOW-IT-WAS-MADE.md)
+for the Lumi MCP, HyperFrames and Qwen voice-cloning workflow. Authoring tools are
+not required for playback. Sample content has [separate licence terms](samples/footing-blockwall/LICENSE.md).
+
 ## Build and package
 
 This initial repository provides source and build scripts, without a hosted binary

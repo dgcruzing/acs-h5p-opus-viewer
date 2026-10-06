@@ -6,3 +6,6 @@
 *.js text eol=lf
 *.mjs text eol=lf
 *.md text eol=lf
+*.h5p binary
+/samples/footing-blockwall/*.json text eol=lf
+/samples/footing-blockwall/*.txt text eol=lf

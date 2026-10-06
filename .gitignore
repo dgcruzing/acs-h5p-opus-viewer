@@ -8,6 +8,7 @@
 /web/licenses/
 /node_modules/
 *.h5p
+!/samples/footing-blockwall/acs-footing-blockwall-full-pdf-1.1.1.h5p
 *.zip
 *.pdb
 .env

@@ -1,0 +1,39 @@
+{
+  "title": "From footing to blockwall",
+  "version": "1.1.1",
+  "preparedDate": "2026-10-06",
+  "file": "acs-footing-blockwall-full-pdf-1.1.1.h5p",
+  "sha256": "70ce97604b49d754af34554298572c58ba898b632e52f7485ccd8a9eb9899828",
+  "bytes": 17156303,
+  "mainLibrary": "H5P.CoursePresentation",
+  "h5pCoreBaseline": "1.28",
+  "coursePresentationVersion": "1.27",
+  "overallPackageLicense": "U",
+  "contentLicenseNotice": "Original lesson and ACS theme: CC BY 4.0. Added PDF pages: original rights retained; no additional reuse licence granted. H5P libraries: individual terms.",
+  "counts": {
+    "slides": 14,
+    "audio": 4,
+    "videos": 2,
+    "questions": 2,
+    "transcriptPopups": 6,
+    "addedPdfPages": 5,
+    "packagedLibraries": 64
+  },
+  "authoring": {
+    "editor": "ACS local Lumi / H5P Course Presentation",
+    "mcp": "ACS local revision-guarded Lumi bridge; not distributed in this repository",
+    "hyperframes": "HTML/SVG/GSAP compositions rendered to 1280x720 MP4 at 30 fps",
+    "voice": "Local Qwen3-TTS-12Hz-1.7B-Base; authorised ACS reference; synthetic narration",
+    "nativeVoiceSampleRateHz": 24000,
+    "voiceReferenceDistributed": false
+  },
+  "viewerPlayerBaseline": "@missing-elements/h5p-offline-player 0.3.1",
+  "verification": {
+    "originalLessonAndMediaUnchangedInThemedRevision": true,
+    "fivePageImageHashesVerified": true,
+    "finalFiveLayoutsBrowserVerified": true,
+    "precedingIllustratedRevisionFullPlaybackVerified": true,
+    "exactFinalPackageActualOpusAcceptance": "pending",
+    "humanListening": "pending"
+  }
+}
