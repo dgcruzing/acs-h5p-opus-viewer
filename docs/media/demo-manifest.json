@@ -1,0 +1,16 @@
+{
+  "separateSubtitleTrack": false,
+  "publishedDate": "2026-10-07",
+  "bytes": 14505631,
+  "height": 1080,
+  "width": 1920,
+  "sha256": "bdbb118b240edf23b3456431dfb190866e7721687541daaa4a7d042d60bd2fb1",
+  "durationSeconds": 135.616,
+  "file": "acs-h5p-viewer-demo.mp4",
+  "audioChannels": 2,
+  "audioCodec": "AAC",
+  "audioSampleRateHz": 48000,
+  "framesPerSecond": 30,
+  "videoCodec": "H.264",
+  "fullLength": true
+}

@@ -7,5 +7,6 @@
 *.mjs text eol=lf
 *.md text eol=lf
 *.h5p binary
+*.mp4 binary
 /samples/footing-blockwall/*.json text eol=lf
 /samples/footing-blockwall/*.txt text eol=lf
