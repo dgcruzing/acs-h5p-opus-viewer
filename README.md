@@ -50,6 +50,10 @@ manifest. Close the standalone host before rebuilding its executable.
 
 ## Install on another computer
 
+Prefer using an agent? Copy the [agent setup prompt](docs/AGENT-SETUP-PROMPT.md).
+It handles either a source checkout or an extracted prebuilt transfer pack,
+checks target-PC prerequisites, and guides actual Opus verification.
+
 1. Extract the generated transfer ZIP into a writable local folder.
 2. Run **Check.cmd** to verify the pack and prerequisites.
 3. Exit Opus normally. Run **Install.cmd** and approve Windows elevation.

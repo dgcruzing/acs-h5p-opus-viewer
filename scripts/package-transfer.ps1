@@ -11,13 +11,14 @@ Copy-Item -LiteralPath (Join-Path $release 'ACSH5PViewer.dll'),(Join-Path $relea
 # Never transfer the source machine's absolute Node path into runtime configuration.
 @{node='CONFIGURED_BY_SETUP';version='0.1.0';player='0.3.1'} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $payload 'ACSH5PViewer_assets\runtime.json') -Encoding UTF8
 foreach($file in @('Setup.ps1','START-HERE.txt','VERIFY.txt')) { Copy-Item -LiteralPath (Join-Path $projectRoot ('transfer\'+$file)) -Destination $pack }
+Copy-Item -LiteralPath (Join-Path $projectRoot 'docs\AGENT-SETUP-PROMPT.md') -Destination $pack
 foreach($action in @('Check','Install','Verify','Uninstall')) {
   @('@echo off',('powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0Setup.ps1" -Action '+$action),'set "result=%ERRORLEVEL%"','echo.','pause','exit /b %result%') | Set-Content -LiteralPath (Join-Path $pack ($action+'.cmd')) -Encoding ASCII
 }
 foreach($file in @('LICENSE','THIRD-PARTY-NOTICES.md','dependencies.json')) { Copy-Item -LiteralPath (Join-Path $projectRoot $file) -Destination $pack }
 $source=Join-Path $pack 'source'
 New-Item -ItemType Directory -Path $source | Out-Null
-foreach($folder in @('native','helper','web','transfer')) { Copy-Item -LiteralPath (Join-Path $projectRoot $folder) -Destination $source -Recurse }
+foreach($folder in @('native','helper','web','transfer','docs')) { Copy-Item -LiteralPath (Join-Path $projectRoot $folder) -Destination $source -Recurse }
 foreach($file in @('CMakeLists.txt','dependencies.json','package.json','LICENSE','THIRD-PARTY-NOTICES.md')) { Copy-Item -LiteralPath (Join-Path $projectRoot $file) -Destination $source }
 New-Item -ItemType Directory -Path (Join-Path $source 'scripts') | Out-Null
 foreach($file in @('bootstrap.ps1','build.ps1','package-transfer.ps1')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot $file) -Destination (Join-Path $source 'scripts') }

@@ -8,6 +8,10 @@ A working H5P sample for **ACS H5P Viewer for Directory Opus**, made with native
 
 ## Try it in Opus
 
+To have an agent set up the viewer and this sample on your PC, copy the
+[agent setup prompt](../../docs/AGENT-SETUP-PROMPT.md). It supports source builds
+and prebuilt transfer packs.
+
 1. Install and enable ACS H5P Viewer using the repository's [setup instructions](../../README.md#install-on-another-computer).
 2. Download the sample to a local folder and select it in the Opus viewer pane.
 3. Use the presentation arrows or slide menu to explore all fourteen slides.
