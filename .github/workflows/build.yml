@@ -1,0 +1,23 @@
+name: Windows build and helper tests
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Portable tests
+        run: node --test tests/*.test.mjs
+      - name: Fetch pinned dependencies
+        shell: pwsh
+        run: ./scripts/bootstrap.ps1
+      - name: Build Windows x64 plugin and host
+        shell: pwsh
+        run: ./scripts/build.ps1

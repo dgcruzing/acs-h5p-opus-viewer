@@ -1,0 +1,32 @@
+Target PC acceptance - ACS H5P Viewer 0.1.0
+
+Run Check.cmd before installation and Verify.cmd after installation.
+Verify checks file hashes and the installed runtime configuration, not interactive playback.
+
+In Directory Opus record the PC name, Windows/Opus/Node/WebView2 versions, lesson name,
+date and result for each item below. Keep screenshots if anything fails.
+
+[ ] ACS H5P Viewer is listed/enabled under Preferences > Viewer > Plugins.
+[ ] Selecting an .h5p displays the lesson. Other file types still use their existing viewers.
+[ ] All slides advance; questions show feedback when checked.
+[ ] Audio plays on click, pauses, and never starts automatically.
+[ ] Both video playback and seeking work; captions/transcripts are available.
+[ ] Switching files during playback stops old audio and shows only the new lesson.
+[ ] Reload shows changed package contents at the same path.
+[ ] Resizing and keyboard focus behave correctly.
+[ ] Two viewer instances operate independently; closing one leaves the other usable.
+[ ] Unicode filenames and a network-share lesson load if used in your workflow.
+[ ] Local lessons work with internet access unavailable after prerequisites are installed.
+[ ] Source files have not changed; malformed packages show a visible error.
+
+Known catalog exception: contractual-breaches-accordion.h5p is malformed and reports
+Cannot read properties of undefined (reading 'attach'). Do not treat that known source
+failure as proof that the viewer installation is broken.
+
+Troubleshooting:
+- No preview: enable the viewer pane and Refresh the viewer plugin list.
+- Node missing: rerun Check.cmd; install Node x64 LTS or supply -NodePath.
+- Blank/runtime failure: check WebView2 Evergreen and %LOCALAPPDATA%\ACS\H5PViewer\logs.
+- Installer refuses an existing ACS plugin: read START-HERE.txt before using -Force.
+- Inspect setup-result.txt for the last setup failure.
+- No source lessons are repaired or downloaded automatically.

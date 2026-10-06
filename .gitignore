@@ -1,0 +1,15 @@
+/build/
+/release/
+/backups/
+/audit/
+/vendor/
+/transfers/
+/web/assets/
+/web/licenses/
+/node_modules/
+*.h5p
+*.zip
+*.pdb
+.env
+.env.*
+setup-result.txt

@@ -1,0 +1,6 @@
+{
+  "opusSdk": {"url":"https://cdn2.gpsoft.com.au/files/Misc/opus_sdk.zip","sha256":"B908D0F9CF34CC93E2E89EA48856BD192CC5D2E45ABB42C1D581500F928D59B9"},
+  "webview2": {"version":"1.0.3650.58","url":"https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/1.0.3650.58/microsoft.web.webview2.1.0.3650.58.nupkg","sha256":"911A472128C82AC8BAA0C486C23342CC9DD6E7DC50D754E676726642CA065C60"},
+  "json": {"version":"3.12.0","url":"https://raw.githubusercontent.com/nlohmann/json/v3.12.0/single_include/nlohmann/json.hpp","sha256":"AAF127C04CB31C406E5B04A63F1AE89369FCCDE6D8FA7CDDA1ED4F32DFC5DE63"},
+  "player": {"version":"0.3.1","url":"https://registry.npmjs.org/@missing-elements/h5p-offline-player/-/h5p-offline-player-0.3.1.tgz","sha256":"F4974AED6552343259817FBCF8F96149D668EF0A3C808F781EA723E53A8DE805"}
+}
