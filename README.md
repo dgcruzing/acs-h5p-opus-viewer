@@ -1,6 +1,10 @@
 # ACS H5P Viewer for Directory Opus
 
-**[▶ Watch the viewer in action — 2 min 16 sec](https://raw.githubusercontent.com/dgcruzing/acs-h5p-opus-viewer/main/docs/media/acs-h5p-viewer-demo.mp4)**
+**Viewer in action — 2 min 16 sec**
+
+https://github.com/user-attachments/assets/b3fe72ec-dac2-4e1e-821c-a1fb41473ecb
+
+[Watch via JW Player](https://cdn.jwplayer.com/videos/aEBA3kk1-42TyAa1a.mp4) · [Download MP4](https://raw.githubusercontent.com/dgcruzing/acs-h5p-opus-viewer/main/docs/media/acs-h5p-viewer-demo.mp4)
 
 Play local `.h5p` lessons inside the **Directory Opus 13 viewer pane** on Windows x64.
 Slides, questions, audio, video and captions remain interactive. Select another file

@@ -1,6 +1,10 @@
 # Viewer in action
 
-[Watch the screen recording](https://raw.githubusercontent.com/dgcruzing/acs-h5p-opus-viewer/main/docs/media/acs-h5p-viewer-demo.mp4) or [open the video file on GitHub](acs-h5p-viewer-demo.mp4).
+https://github.com/user-attachments/assets/b3fe72ec-dac2-4e1e-821c-a1fb41473ecb
+
+[Watch via JW Player](https://cdn.jwplayer.com/videos/aEBA3kk1-42TyAa1a.mp4) · [Download MP4](https://raw.githubusercontent.com/dgcruzing/acs-h5p-opus-viewer/main/docs/media/acs-h5p-viewer-demo.mp4) · [Open the repository video file](acs-h5p-viewer-demo.mp4).
+
+The GitHub attachment plays directly in the README. The JW Player link opens a browser video player; the repository copy remains available for download. Both playback routes were checked on 7 October 2026.
 
 The recording shows several H5P packages in the actual Directory Opus viewer pane, including an earlier nine-slide version of the Footing to blockwall lesson. The downloadable repository sample is the later fourteen-slide illustrated edition. This demonstration is not an exhaustive acceptance test.
 
