@@ -17,7 +17,7 @@ function Resolve-PackFile([string]$Relative) {
 }
 function Test-Pack {
   $manifest=Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-  if ($manifest.version -ne '0.1.0' -or @($manifest.files).Count -lt 10) { throw 'Invalid transfer manifest.' }
+  if ($manifest.version -ne '0.1.1' -or @($manifest.files).Count -lt 10) { throw 'Invalid transfer manifest.' }
   foreach($entry in $manifest.files) {
     $file=Resolve-PackFile $entry.path
     if (!(Test-Path -LiteralPath $file -PathType Leaf)) { throw "Missing package file: $($entry.path)" }
@@ -159,11 +159,11 @@ try {
     }
     New-Item -ItemType Directory -Path $script:viewers -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $payload 'ACSH5PViewer_assets') -Destination $script:viewers -Recurse -Force
-    @{node=$NodePath;version='0.1.0';player='0.3.1'} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $script:assets 'runtime.json') -Encoding UTF8
+    @{node=$NodePath;version='0.1.1';player='0.3.1'} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $script:assets 'runtime.json') -Encoding UTF8
     Copy-Item -LiteralPath (Join-Path $payload 'ACSH5PViewer.dll') -Destination $script:dll -Force
-    @{product='ACS H5P Viewer';version='0.1.0';opusDirectory=$script:opus;installedAt=[DateTime]::UtcNow.ToString('o');runtimeSha256=(Get-FileHash -LiteralPath (Join-Path $script:assets 'runtime.json') -Algorithm SHA256).Hash} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $script:assets 'installation.json') -Encoding UTF8
+    @{product='ACS H5P Viewer';version='0.1.1';opusDirectory=$script:opus;installedAt=[DateTime]::UtcNow.ToString('o');runtimeSha256=(Get-FileHash -LiteralPath (Join-Path $script:assets 'runtime.json') -Algorithm SHA256).Hash} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $script:assets 'installation.json') -Encoding UTF8
     Assert-Installed
-    $message='Installed ACS H5P Viewer 0.1.0. Open Opus > Settings > Preferences > Viewer > Plugins > Refresh. Enable ACS H5P Viewer, then select an .h5p file with the viewer pane open.'
+    $message='Installed ACS H5P Viewer 0.1.1. Open Opus > Settings > Preferences > Viewer > Plugins > Refresh. Enable ACS H5P Viewer, then select an .h5p file with the viewer pane open.'
   } else {
     Assert-Installed
     # Refuse unexpected files and links rather than recursively deleting user additions.

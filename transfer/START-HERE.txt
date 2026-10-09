@@ -1,4 +1,4 @@
-ACS H5P Viewer 0.1.0 - personal transfer pack for Directory Opus
+ACS H5P Viewer 0.1.1 - personal transfer pack for Directory Opus
 
 Agent-assisted setup: copy the prompt in AGENT-SETUP-PROMPT.md from a newly
 generated pack, or open https://github.com/dgcruzing/acs-h5p-opus-viewer/blob/main/docs/AGENT-SETUP-PROMPT.md

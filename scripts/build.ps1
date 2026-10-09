@@ -10,7 +10,7 @@ $cmake = Join-Path $vs 'Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\c
 if ($LASTEXITCODE) { throw 'CMake configuration failed.' }
 & $cmake --build (Join-Path $projectRoot 'build') --config $Configuration --parallel 4
 if ($LASTEXITCODE) { throw 'Native build failed.' }
-$releaseRoot = Join-Path $projectRoot 'release\0.1.0'
+$releaseRoot = Join-Path $projectRoot 'release\0.1.1'
 $assetsRoot = Join-Path $releaseRoot 'ACSH5PViewer_assets'
 New-Item -ItemType Directory -Path $assetsRoot -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $projectRoot "build\$Configuration\ACSH5PViewer.dll"),(Join-Path $projectRoot "build\$Configuration\ACSH5PTestHost.exe") -Destination $releaseRoot -Force
@@ -21,6 +21,6 @@ Copy-Item -LiteralPath (Join-Path $projectRoot 'LICENSE'),(Join-Path $projectRoo
 Copy-Item -LiteralPath (Join-Path $projectRoot 'vendor\json\LICENSE.MIT') -Destination (Join-Path $licencesRoot 'nlohmann-json-LICENSE.MIT') -Force
 Copy-Item -LiteralPath (Join-Path $projectRoot 'vendor\webview2\LICENSE.txt') -Destination (Join-Path $licencesRoot 'WebView2-LICENSE.txt') -Force
 $node = (Get-Command node.exe -ErrorAction Stop).Source
-@{node=$node;version='0.1.0';player='0.3.1'} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $assetsRoot 'runtime.json') -Encoding utf8
+@{node=$node;version='0.1.1';player='0.3.1'} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $assetsRoot 'runtime.json') -Encoding utf8
 Get-ChildItem -LiteralPath $releaseRoot -Recurse -File | ForEach-Object { @{path=$_.FullName.Substring($releaseRoot.Length+1);sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash;bytes=$_.Length} } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $projectRoot 'audit\release-files.json')
 Write-Output "Built and staged: $releaseRoot"

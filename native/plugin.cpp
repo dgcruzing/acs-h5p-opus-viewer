@@ -9,7 +9,7 @@ extern "C" __declspec(dllexport) void DVP_Uninit() {}
 extern "C" __declspec(dllexport) BOOL DVP_IdentifyW(LPVIEWERPLUGININFOW p) {
   if (!p || p->cbSize < VIEWERPLUGININFOW_V1_SIZE) return FALSE;
   p->dwFlags = DVPFIF_ExtensionsOnly | DVPFIF_NoThumbnails | DVPFIF_NoProperties | DVPFIF_NoFileInformation;
-  p->dwVersionHigh = MAKELONG(1,0); p->dwVersionLow = 0;
+  p->dwVersionHigh = MAKELONG(1,0); p->dwVersionLow = MAKELONG(0,1);
   lstrcpynW(p->lpszHandleExts,L".h5p",p->cchHandleExtsMax);
   lstrcpynW(p->lpszName,L"ACS H5P Viewer",p->cchNameMax);
   lstrcpynW(p->lpszDescription,L"Interactive local H5P viewer (WebView2)",p->cchDescriptionMax);

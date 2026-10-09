@@ -10,7 +10,11 @@ Play local `.h5p` lessons inside the **Directory Opus 13 viewer pane** on Window
 Slides, questions, audio, video and captions remain interactive. Select another file
 to unload the previous lesson; use Reload to read updated package contents.
 
-**Version 0.1.0 is an early community source release.** The maintainer reports a
+**Version 0.1.1 fixes preview placement after pane/window movement and display changes.**
+The maintainer confirmed improved operation in the actual Opus remote-login session.
+See the [0.1.1 release notes](docs/RELEASE-0.1.1.md) for tests and remaining limits.
+
+This is an early community source release. The maintainer reports a
 successful installation on a second clean computer. Detailed media automation passed
 in the compiled-DLL test host; real Opus rendering and file switching were separately
 observed on the development machine. See [validation scope](docs/VALIDATION.md).
@@ -50,7 +54,7 @@ Bootstrap downloads dependencies pinned by URL and SHA-256 in `dependencies.json
 including `@missing-elements/h5p-offline-player` **0.3.1** and the official Opus/WebView2
 SDKs. No `npm install` is needed for the build.
 
-The build stages `release/0.1.0/`. Packaging creates a timestamped ZIP under
+The build stages `release/0.1.1/`. Packaging creates a timestamped ZIP under
 `transfers/` with the DLL, player assets, source, licences, setup scripts and a hash
 manifest. Close the standalone host before rebuilding its executable.
 
@@ -80,7 +84,7 @@ For custom paths see [setup instructions](transfer/START-HERE.txt). The scripts 
 After building, substitute your own lesson path:
 
 ```powershell
-& .\release\0.1.0\ACSH5PTestHost.exe --plugin 'C:\Lessons\example.h5p'
+& .\release\0.1.1\ACSH5PTestHost.exe --plugin 'C:\Lessons\example.h5p'
 ```
 
 This loads the real DLL through its Opus SDK interface in a separate host; it does

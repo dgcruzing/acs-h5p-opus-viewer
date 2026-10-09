@@ -57,7 +57,7 @@ Proceed through routine checks without asking me to approve every command.
    proceeding. Bootstrap checks dependency
    hashes against dependencies.json; do not replace pins or ignore mismatches.
    No npm install is required for this repository's build.
-   The release is staged under release/0.1.0 and the packaging script reports
+   The release is staged under release/0.1.1 and the packaging script reports
    the generated transfer folder/ZIP under transfers/. Use that generated
    pack's Setup.ps1 and manifest.json for installation, not transfer/Setup.ps1.
    Keep logs and the generated pack for verification and later uninstall.

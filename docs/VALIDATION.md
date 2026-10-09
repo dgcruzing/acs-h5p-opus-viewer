@@ -1,5 +1,13 @@
 # Validation scope — 6 October 2026
 
+## 10 October 2026 - version 0.1.1
+
+The maintainer confirmed correct preview behaviour after installing the placement
+fix in the actual remote-login Opus session. Native controller checks passed at
+175% display scaling, including ancestor movement without resize. See the
+[release notes](RELEASE-0.1.1.md). Real reconnect/monitor/DPI transition coverage
+is not implied by that confirmation. The earlier results below remain historical.
+
 Development results and maintainer reports are separate from CI. Private lesson
 fixtures, screenshots, logs and machine identifiers are not published.
 

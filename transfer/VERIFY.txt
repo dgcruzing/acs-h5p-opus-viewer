@@ -1,4 +1,9 @@
-Target PC acceptance - ACS H5P Viewer 0.1.0
+Target PC acceptance - ACS H5P Viewer 0.1.1
+
+Placement regression: check initial placement, move/resize the viewer pane and Opus
+window, hide/reopen the pane, and navigate slides. If using remote login, also test
+disconnect/reconnect and any monitor/display-scale transitions you normally use.
+Record PASS, FAIL or NOT TESTED separately for each case.
 
 Run Check.cmd before installation and Verify.cmd after installation.
 Verify checks file hashes and the installed runtime configuration, not interactive playback.
