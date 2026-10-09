@@ -19,6 +19,7 @@ namespace fs=std::filesystem;
 namespace acs {
 static HINSTANCE instance;
 static constexpr UINT PollMessage=WM_APP+120;
+static constexpr UINT_PTR GeometryTimer=2;
 static constexpr wchar_t ClassName[]=L"ACSH5PViewerWindow";
 static fs::path runtimeRoot;
 static std::once_flag initFlag;
@@ -53,11 +54,35 @@ struct Viewer : std::enable_shared_from_this<Viewer> {
   ComPtr<ICoreWebView2Controller> controller;
   ComPtr<ICoreWebView2> web;
   std::ofstream log;
+  RECT lastBounds{}; POINT lastOrigin{}; UINT lastDpi{};
+  bool geometryKnown{},contentVisible{},lastVisible{};
   void Record(const std::string& event,json details=json::object()) {
     if(log) { details["event"]=event; details["tick"]=GetTickCount64(); details["generation"]=generation; log<<details.dump()<<"\n"; log.flush(); }
   }
   void Status(const std::wstring& text) { status=text; InvalidateRect(hwnd,nullptr,TRUE); Record("status",{{"text",Utf8(text)}}); }
-  void Fail(const std::wstring& text) { if(web) { web->Stop(); web->Navigate(L"about:blank"); } if(controller) controller->put_IsVisible(FALSE); Status(text); }
+  // Bounds are local to our child HWND. Screen coordinates are only a change
+  // detector: passing them to put_Bounds would offset the browser twice.
+  void SyncGeometry(const char* reason,bool force=false) {
+    if(!controller || closed) return;
+    RECT bounds{}; POINT screen{};
+    if(!GetClientRect(hwnd,&bounds) || !ClientToScreen(hwnd,&screen)) return;
+    auto dpi=GetDpiForWindow(hwnd);
+    bool visible=contentVisible && IsWindowVisible(hwnd) && bounds.right>0 && bounds.bottom>0;
+    bool changed=!geometryKnown || !EqualRect(&bounds,&lastBounds) || screen.x!=lastOrigin.x || screen.y!=lastOrigin.y || dpi!=lastDpi || visible!=lastVisible;
+    if(!force && !changed) return;
+    // Reapply client bounds on movement/DPI changes as well as size changes.
+    auto hr=controller->put_Bounds(bounds);
+    auto moved=controller->NotifyParentWindowPositionChanged();
+    auto shown=controller->put_IsVisible(visible);
+    RECT actual{}; auto read=controller->get_Bounds(&actual);
+    Record("geometry_sync",{{"reason",reason},{"bounds",{bounds.left,bounds.top,bounds.right,bounds.bottom}},
+      {"actualBounds",{actual.left,actual.top,actual.right,actual.bottom}},{"screenOrigin",{screen.x,screen.y}},
+      {"dpi",dpi},{"visible",visible},{"boundsResult",hr},{"notifyResult",moved},{"visibilityResult",shown},
+      {"boundsMatch",SUCCEEDED(read) && EqualRect(&bounds,&actual)!=FALSE}});
+    geometryKnown=SUCCEEDED(hr) && SUCCEEDED(moved) && SUCCEEDED(shown);
+    lastBounds=bounds; lastOrigin=screen; lastDpi=dpi; lastVisible=visible;
+  }
+  void Fail(const std::wstring& text) { contentVisible=false; if(web) { web->Stop(); web->Navigate(L"about:blank"); } if(controller) controller->put_IsVisible(FALSE); Status(text); }
   void Send(json data) { { std::lock_guard lock(gate); if(stopping) return; outgoing.push_back(data.dump()+"\n"); } wake.notify_one(); }
   void SetupProfile() {
     auto root=UserRoot(); fs::create_directories(root/L"logs"); fs::create_directories(root/L"profiles");
@@ -142,7 +167,7 @@ struct Viewer : std::enable_shared_from_this<Viewer> {
   bool Allowed(const std::wstring& url) const {
     return !origin.empty() && url.rfind(origin+L"/",0)==0;
   }
-  void NavigatePending() { if(web && !pendingUrl.empty()) { controller->put_IsVisible(TRUE); web->Navigate(pendingUrl.c_str()); Record("navigate"); } }
+  void NavigatePending() { if(web && !pendingUrl.empty()) { contentVisible=true; SyncGeometry("navigate",true); web->Navigate(pendingUrl.c_str()); Record("navigate"); } }
   void Browser() {
     if(browserStarting || closed) return; browserStarting=true;
     auto weak=weak_from_this(); auto options=Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
@@ -182,11 +207,15 @@ struct Viewer : std::enable_shared_from_this<Viewer> {
         s->web->add_PermissionRequested(Callback<ICoreWebView2PermissionRequestedEventHandler>([](ICoreWebView2*,ICoreWebView2PermissionRequestedEventArgs* e)->HRESULT { e->put_State(COREWEBVIEW2_PERMISSION_STATE_DENY); return S_OK; }).Get(),&token);
         ComPtr<ICoreWebView2_4> v4; if(SUCCEEDED(s->web.As(&v4))) v4->add_DownloadStarting(Callback<ICoreWebView2DownloadStartingEventHandler>([](ICoreWebView2*,ICoreWebView2DownloadStartingEventArgs* e)->HRESULT { e->put_Cancel(TRUE); return S_OK; }).Get(),&token);
         s->web->add_ProcessFailed(Callback<ICoreWebView2ProcessFailedEventHandler>([weak](ICoreWebView2*,ICoreWebView2ProcessFailedEventArgs*)->HRESULT { if(auto s=weak.lock();s && !s->closed) s->Fail(L"The browser process stopped. Select the lesson again or reopen the viewer."); return S_OK; }).Get(),&token);
-        s->web->add_NavigationCompleted(Callback<ICoreWebView2NavigationCompletedEventHandler>([weak](ICoreWebView2*,ICoreWebView2NavigationCompletedEventArgs* e)->HRESULT { if(auto s=weak.lock();s && !s->closed) { BOOL ok; e->get_IsSuccess(&ok); s->Record("navigation_complete",{{"success",ok!=FALSE}}); } return S_OK; }).Get(),&token);
+        s->web->add_NavigationCompleted(Callback<ICoreWebView2NavigationCompletedEventHandler>([weak](ICoreWebView2*,ICoreWebView2NavigationCompletedEventArgs* e)->HRESULT { if(auto s=weak.lock();s && !s->closed) { BOOL ok; e->get_IsSuccess(&ok); s->Record("navigation_complete",{{"success",ok!=FALSE}}); s->SyncGeometry("navigation_complete",true); } return S_OK; }).Get(),&token);
         s->controller->add_MoveFocusRequested(Callback<ICoreWebView2MoveFocusRequestedEventHandler>([weak](ICoreWebView2Controller*,ICoreWebView2MoveFocusRequestedEventArgs* e)->HRESULT {
           if(auto s=weak.lock();s && !s->closed) { if(s->flags&DVPCVF_ReturnTabs) { NMKEY k{}; k.hdr.hwndFrom=s->hwnd; k.hdr.idFrom=GetDlgCtrlID(s->hwnd); k.hdr.code=NM_KEYDOWN; k.nVKey=VK_TAB; SendMessageW(GetParent(s->hwnd),WM_NOTIFY,k.hdr.idFrom,reinterpret_cast<LPARAM>(&k)); } else SetFocus(GetParent(s->hwnd)); e->put_Handled(TRUE); } return S_OK;
         }).Get(),&token);
-        RECT r; GetClientRect(s->hwnd,&r); ctrl->put_Bounds(r); s->Record("webview_ready",{{"debugPort",s->debugPort}}); s->NavigatePending(); return S_OK;
+        s->SyncGeometry("controller_created",true);
+        // Ancestor moves and remote-session display changes are not reliably
+        // forwarded to child windows. Only changed geometry triggers COM calls.
+        SetTimer(s->hwnd,GeometryTimer,500,nullptr);
+        s->Record("webview_ready",{{"debugPort",s->debugPort}}); s->NavigatePending(); return S_OK;
       }).Get()); return S_OK;
     }).Get());
     if(FAILED(hr)) Fail(L"WebView2 initialization failed.");
@@ -202,15 +231,15 @@ struct Viewer : std::enable_shared_from_this<Viewer> {
     } catch(const std::exception&) { Fail(L"Invalid response from local player helper."); } }
   }
   bool Load(const std::wstring& path) {
-    ++generation; selected=path; pendingUrl.clear();
+    ++generation; selected=path; pendingUrl.clear(); contentVisible=false;
     if(web) { web->Stop(); web->Navigate(L"about:blank"); } if(controller) controller->put_IsVisible(FALSE);
     Status(L"Loading "+fs::path(path).filename().wstring()+L"…");
     if(helperReady) Send({{"cmd","load"},{"path",Utf8(path)},{"generation",generation}});
     return true;
   }
-  void Clear() { ++generation; selected.clear(); pendingUrl.clear(); if(web) { web->Stop(); web->Navigate(L"about:blank"); } if(controller) controller->put_IsVisible(FALSE); if(helperReady) Send({{"cmd","clear"},{"generation",generation}}); Status(L"Select an H5P lesson."); }
+  void Clear() { ++generation; selected.clear(); pendingUrl.clear(); contentVisible=false; if(web) { web->Stop(); web->Navigate(L"about:blank"); } if(controller) controller->put_IsVisible(FALSE); if(helperReady) Send({{"cmd","clear"},{"generation",generation}}); Status(L"Select an H5P lesson."); }
   void Close() {
-    if(closed) return; closed=true; KillTimer(hwnd,1); Record("closing");
+    if(closed) return; closed=true; KillTimer(hwnd,1); KillTimer(hwnd,GeometryTimer); Record("closing");
     if(controller) controller->Close(); web.Reset(); controller.Reset(); environment.Reset();
     { std::lock_guard lock(gate); stopping=true; } wake.notify_all();
     if(job) { CloseHandle(job); job=nullptr; } // Kills only this viewer's helper job.
@@ -231,8 +260,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp) {
   switch(msg) {
     case WM_CREATE: s->Start(); return 0;
     case PollMessage: s->Poll(); return 0;
-    case WM_TIMER: if(wp==1) { KillTimer(hwnd,1); if(!s->helperReady) s->Fail(L"Local H5P helper did not become ready. Reopen the viewer to retry."); } return 0;
-    case WM_SIZE: if(s->controller) { RECT r; GetClientRect(hwnd,&r); s->controller->put_Bounds(r); s->controller->NotifyParentWindowPositionChanged(); } return 0;
+    case WM_TIMER: if(wp==1) { KillTimer(hwnd,1); if(!s->helperReady) s->Fail(L"Local H5P helper did not become ready. Reopen the viewer to retry."); } else if(wp==GeometryTimer) s->SyncGeometry("watchdog"); return 0;
+    case WM_SIZE: s->SyncGeometry("size"); return 0;
+    case WM_MOVE: s->SyncGeometry("move"); return 0;
+    case WM_WINDOWPOSCHANGED: s->SyncGeometry("window_position"); break; // Keep default WM_SIZE/WM_MOVE delivery.
+    case WM_DPICHANGED_AFTERPARENT: s->SyncGeometry("dpi",true); break;
+    case WM_DISPLAYCHANGE: s->SyncGeometry("display",true); break;
+    case WM_SHOWWINDOW: s->SyncGeometry("show",true); break;
     case WM_SETFOCUS: if(s->controller) s->controller->MoveFocus(COREWEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC); return 0;
     case WM_PAINT: { PAINTSTRUCT ps; HDC dc=BeginPaint(hwnd,&ps); RECT r; GetClientRect(hwnd,&r); FillRect(dc,&r,GetSysColorBrush(COLOR_WINDOW)); SetBkMode(dc,TRANSPARENT); SetTextColor(dc,GetSysColor(COLOR_WINDOWTEXT)); InflateRect(&r,-20,-20); DrawTextW(dc,s->status.c_str(),-1,&r,DT_WORDBREAK); EndPaint(hwnd,&ps); return 0; }
     case DVPLUGINMSG_LOADW: return lp && IsH5P(reinterpret_cast<wchar_t*>(lp)) && s->Load(reinterpret_cast<wchar_t*>(lp));
@@ -241,7 +275,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp) {
     case DVPLUGINMSG_GETCAPABILITIES: return VPCAPABILITY_WANTFOCUS|VPCAPABILITY_WANTMOUSEWHEEL;
     case DVPLUGINMSG_RESIZE: MoveWindow(hwnd,static_cast<short>(LOWORD(wp)),static_cast<short>(HIWORD(wp)),LOWORD(lp),HIWORD(lp),TRUE); return TRUE;
     case DVPLUGINMSG_PREVENTAUTOSIZE: case DVPLUGINMSG_PREVENTFRAME: return TRUE;
-    case DVPLUGINMSG_REDRAW: InvalidateRect(hwnd,nullptr,TRUE); return TRUE;
+    case DVPLUGINMSG_REDRAW: s->SyncGeometry("opus_redraw",true); InvalidateRect(hwnd,nullptr,TRUE); return TRUE;
     case WM_DESTROY: s->Close(); return 0;
     case WM_NCDESTROY: SetWindowLongPtrW(hwnd,GWLP_USERDATA,0); delete holder; return DefWindowProcW(hwnd,msg,wp,lp);
   }

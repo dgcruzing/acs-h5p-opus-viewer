@@ -1,6 +1,6 @@
 {
   "name": "acs-h5p-opus-viewer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Interactive H5P viewer plugin for Directory Opus 13 on Windows x64",
   "license": "MIT",

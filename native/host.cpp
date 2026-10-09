@@ -3,9 +3,26 @@
 static HWND viewer;
 static unsigned debugPort;
 static PFNDVPCREATEVIEWER pluginCreate;
+static bool geometryTest;
+static unsigned geometryStep;
 LRESULT CALLBACK HostProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
-  if(msg == WM_CREATE) { RECT r; GetClientRect(hwnd,&r); viewer=pluginCreate?pluginCreate(hwnd,&r,0):acs::CreateViewer(hwnd,r,0,debugPort); return viewer?0:-1; }
-  if(msg == WM_SIZE && viewer) { MoveWindow(viewer,0,0,LOWORD(lp),HIWORD(lp),TRUE); return 0; }
+  if(msg == WM_CREATE) { RECT r; GetClientRect(hwnd,&r); if(geometryTest) r={137,91,937,591}; viewer=pluginCreate?pluginCreate(hwnd,&r,0):acs::CreateViewer(hwnd,r,0,debugPort); return viewer?0:-1; }
+  if(msg == WM_SIZE && viewer && !geometryTest) { MoveWindow(viewer,0,0,LOWORD(lp),HIWORD(lp),TRUE); return 0; }
+  // Opt-in self-contained regression scenario: never touches another app/window.
+  if(msg == WM_TIMER && wp==20 && geometryTest) {
+    ++geometryStep;
+    if(geometryStep==1) { KillTimer(hwnd,20); SetTimer(hwnd,20,2000,nullptr); }
+    if(geometryStep==2) MoveWindow(viewer,221,143,800,500,TRUE); // Move only.
+    if(geometryStep==3) SetWindowPos(hwnd,nullptr,310,240,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE); // Ancestor only.
+    if(geometryStep==4) SendMessageW(viewer,DVPLUGINMSG_RESIZE,MAKELPARAM(41,57),MAKELPARAM(640,360));
+    if(geometryStep==5) SendMessageW(viewer,WM_DPICHANGED_AFTERPARENT,0,0); // Handler coverage, not an actual DPI switch.
+    if(geometryStep==6) SendMessageW(viewer,WM_DISPLAYCHANGE,32,MAKELPARAM(1920,1080));
+    if(geometryStep==7) ShowWindow(viewer,SW_HIDE);
+    if(geometryStep==8) ShowWindow(viewer,SW_SHOWNA);
+    if(geometryStep==9) SendMessageW(viewer,DVPLUGINMSG_CLEAR,0,0);
+    if(geometryStep==10) { KillTimer(hwnd,20); DestroyWindow(hwnd); }
+    return 0;
+  }
   if(msg == WM_SETFOCUS && viewer) { SetFocus(viewer); return 0; }
   if(msg == WM_COPYDATA) {
     auto data=reinterpret_cast<COPYDATASTRUCT*>(lp);
@@ -19,7 +36,7 @@ int WINAPI wWinMain(HINSTANCE instance,HINSTANCE,LPWSTR,int show) {
   SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
   int argc=0; auto argv=CommandLineToArgvW(GetCommandLineW(),&argc);
   std::wstring file; bool usePlugin=false;
-  for(int i=1;i<argc;i++) { if(std::wstring(argv[i])==L"--debug-port" && i+1<argc) debugPort=std::stoul(argv[++i]); else if(std::wstring(argv[i])==L"--plugin") usePlugin=true; else file=argv[i]; }
+  for(int i=1;i<argc;i++) { if(std::wstring(argv[i])==L"--debug-port" && i+1<argc) debugPort=std::stoul(argv[++i]); else if(std::wstring(argv[i])==L"--plugin") usePlugin=true; else if(std::wstring(argv[i])==L"--geometry-test") geometryTest=true; else file=argv[i]; }
   LocalFree(argv);
   if(usePlugin) {
     wchar_t path[32768]; GetModuleFileNameW(instance,path,32768); std::wstring dll=path; dll=dll.substr(0,dll.find_last_of(L"\\/"))+L"\\ACSH5PViewer.dll";
@@ -41,6 +58,7 @@ int WINAPI wWinMain(HINSTANCE instance,HINSTANCE,LPWSTR,int show) {
   if(!hwnd) return 1;
   ShowWindow(hwnd,show); UpdateWindow(hwnd);
   if(!file.empty()) SendMessageW(viewer,DVPLUGINMSG_LOADW,0,reinterpret_cast<LPARAM>(file.c_str()));
+  if(geometryTest) SetTimer(hwnd,20,15000,nullptr);
   MSG msg; while(GetMessageW(&msg,nullptr,0,0)>0) { TranslateMessage(&msg); DispatchMessageW(&msg); }
   return static_cast<int>(msg.wParam);
 }
